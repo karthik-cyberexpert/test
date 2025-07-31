@@ -122,6 +122,36 @@ ON DUPLICATE KEY UPDATE name = name;
 CREATE INDEX idx_od_certificate_reminders 
 ON od_requests (status, certificate_status, end_date, last_notification_date);
 
+-- Profile Change Requests Table for managing requests to change critical information
+CREATE TABLE IF NOT EXISTS `profile_change_requests` (
+  `id` VARCHAR(36) NOT NULL,
+  `student_id` VARCHAR(36) NOT NULL,
+  `student_name` VARCHAR(255) NOT NULL,
+  `student_register_number` VARCHAR(50) NOT NULL,
+  `tutor_id` VARCHAR(36) NOT NULL,
+  `tutor_name` VARCHAR(255) NOT NULL,
+  `change_type` ENUM('email', 'mobile', 'password') NOT NULL,
+  `current_value` TEXT,
+  `requested_value` TEXT NOT NULL,
+  `reason` TEXT,
+  `status` ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+  `admin_comments` TEXT,
+  `requested_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `reviewed_at` TIMESTAMP NULL,
+  `reviewed_by` VARCHAR(36) NULL,
+  `reviewer_name` VARCHAR(255) NULL,
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`tutor_id`) REFERENCES `staff` (`id`) ON DELETE CASCADE,
+  INDEX `idx_student_id` (`student_id`),
+  INDEX `idx_tutor_id` (`tutor_id`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_change_type` (`change_type`),
+  INDEX `idx_requested_at` (`requested_at`),
+  INDEX `idx_student_status` (`student_id`, `status`),
+  INDEX `idx_tutor_status` (`tutor_id`, `status`)
+);
+
 -- Sessions table for single session management
 CREATE TABLE IF NOT EXISTS `user_sessions` (
   `id` VARCHAR(36) NOT NULL,
